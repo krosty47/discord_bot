@@ -7,8 +7,61 @@ Bot de Discord para reproducir canciones `.mp3` locales desde una carpeta `music
 - Windows.
 - Node.js 22 o superior: <https://nodejs.org/>.
 - pnpm 10.12.1 o superior. Si no lo tenés, Node incluye Corepack para habilitarlo.
+- Git para clonar el proyecto: <https://git-scm.com/download/win>.
 - Una cuenta de Discord.
 - Permisos para invitar bots al servidor.
+
+## Instalar herramientas en Windows
+
+Antes de usar el bot en otra computadora, instalá estas herramientas:
+
+### 1. Instalar Node.js
+
+1. Abrí <https://nodejs.org/>.
+2. Descargá la versión **LTS** si es Node.js 22 o superior.
+3. Instalá Node.js con las opciones por defecto.
+4. Abrí **PowerShell** o **Command Prompt** y verificá:
+
+```bat
+node -v
+```
+
+Debe mostrar una versión `22.x` o superior.
+
+### 2. Habilitar pnpm
+
+Node.js incluye Corepack, que permite usar pnpm. En PowerShell o Command Prompt ejecutá:
+
+```bat
+corepack enable
+pnpm -v
+```
+
+Si `pnpm -v` muestra una versión, ya está listo.
+
+### 3. Instalar Git
+
+1. Abrí <https://git-scm.com/download/win>.
+2. Descargá e instalá Git para Windows.
+3. Podés dejar las opciones por defecto.
+4. Cerrá y volvé a abrir PowerShell o Command Prompt.
+5. Verificá:
+
+```bat
+git --version
+```
+
+## Descargar el bot en Windows
+
+Elegí una carpeta donde guardar el bot, por ejemplo `Documents`, y ejecutá:
+
+```bat
+cd %USERPROFILE%\Documents
+git clone https://github.com/krosty47/discord_bot.git
+cd discord_bot
+```
+
+Después seguí con la configuración del archivo `.env`, la instalación de dependencias y el registro de comandos.
 
 ## Qué hace
 
