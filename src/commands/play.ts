@@ -1,6 +1,8 @@
 import { SlashCommandBuilder } from 'discord.js';
 import type { BotCommand } from './types.js';
 
+const DISCORD_AUTOCOMPLETE_VALUE_LIMIT = 100;
+
 export const playCommand: BotCommand = {
   data: new SlashCommandBuilder()
     .setName('play')
@@ -22,6 +24,7 @@ export const playCommand: BotCommand = {
     const focused = interaction.options.getFocused().toLowerCase();
     const tracks = await musicLibrary.listTracks();
     const choices = tracks
+      .filter((track) => track.fileName.length <= DISCORD_AUTOCOMPLETE_VALUE_LIMIT)
       .filter((track) => track.fileName.toLowerCase().includes(focused) || track.displayName.toLowerCase().includes(focused))
       .slice(0, 25)
       .map((track) => ({ name: track.fileName, value: track.fileName }));

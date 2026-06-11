@@ -40,6 +40,8 @@ export class VoiceMusicService {
       return 'Este comando solo funciona dentro de un servidor de Discord.';
     }
 
+    logger.info(`Comando /play recibido en guild ${interaction.guild.id}: ${song}`);
+
     const member = await interaction.guild.members.fetch(interaction.user.id);
     const voiceChannel = member.voice.channel;
 
@@ -76,11 +78,21 @@ export class VoiceMusicService {
     }
 
     session.queue.enqueue(queuedTrack);
-    this.playNext(session);
+    try {
+      this.playNext(session);
+      await entersState(session.player, AudioPlayerStatus.Playing, 5_000);
+    } catch (error) {
+      logger.error(`No se pudo iniciar la reproducción de ${track.fileName}`, error);
+      this.destroySession(session);
+      return `No pude empezar a reproducir **${track.fileName}**. Revisá la consola del bot para ver el error.`;
+    }
+
     return `Reproduciendo **${track.fileName}**.`;
   }
 
   stop(guildId: string): string {
+    logger.info(`Comando /stop recibido en guild ${guildId}`);
+
     const session = this.sessions.get(guildId) ?? this.getExistingConnectionSession(guildId);
     if (!session) return 'No hay música reproduciéndose ahora.';
 
@@ -140,7 +152,9 @@ export class VoiceMusicService {
       selfDeaf: false,
     });
 
+    logger.info(`Conectando a canal de voz ${channelId} en guild ${guildId}`);
     await entersState(connection, VoiceConnectionStatus.Ready, 20_000);
+    logger.info(`Conexión de voz lista en guild ${guildId}`);
 
     const player = createAudioPlayer({
       behaviors: {
@@ -156,6 +170,10 @@ export class VoiceMusicService {
       stopping: false,
     };
 
+    player.on('stateChange', (oldState, newState) => {
+      logger.debug(`AudioPlayer ${guildId}: ${oldState.status} -> ${newState.status}`);
+    });
+
     player.on(AudioPlayerStatus.Idle, () => {
       if (!session.stopping) this.playNext(session);
     });
@@ -164,6 +182,14 @@ export class VoiceMusicService {
       const current = session.queue.current?.track.fileName ?? 'desconocida';
       logger.error(`Error reproduciendo ${current}`, error);
       this.playNext(session);
+    });
+
+    connection.on('stateChange', (oldState, newState) => {
+      logger.debug(`VoiceConnection ${guildId}: ${oldState.status} -> ${newState.status}`);
+    });
+
+    connection.on('error', (error) => {
+      logger.error(`Error en conexión de voz ${guildId}`, error);
     });
 
     connection.on(VoiceConnectionStatus.Disconnected, async () => {
@@ -203,9 +229,23 @@ export class VoiceMusicService {
   private destroySession(session: GuildMusicSession): void {
     session.stopping = true;
     session.queue.clear();
-    session.player.stop(true);
-    session.connection.destroy();
+
+    try {
+      session.player.stop(true);
+    } catch (error) {
+      logger.warn(`No se pudo detener el player de ${session.guildId}`, error);
+    }
+
+    try {
+      if (session.connection.state.status !== VoiceConnectionStatus.Destroyed) {
+        session.connection.destroy();
+      }
+    } catch (error) {
+      logger.warn(`No se pudo destruir la conexión de voz de ${session.guildId}`, error);
+    }
+
     this.sessions.delete(session.guildId);
+    logger.info(`Sesión de música cerrada en guild ${session.guildId}`);
   }
 
   private getExistingConnectionSession(guildId: string): GuildMusicSession | null {

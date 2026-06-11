@@ -4,11 +4,14 @@ import type { BotCommand } from './types.js';
 export const resumeCommand: BotCommand = {
   data: new SlashCommandBuilder().setName('resume').setDescription('Reanuda una canción pausada.'),
   async execute(interaction, { voiceMusic }) {
+    await interaction.deferReply();
+
     if (!interaction.guildId) {
-      await interaction.reply('Este comando solo funciona dentro de un servidor de Discord.');
+      await interaction.editReply('Este comando solo funciona dentro de un servidor de Discord.');
       return;
     }
 
-    await interaction.reply(voiceMusic.resume(interaction.guildId));
+    const message = voiceMusic.resume(interaction.guildId);
+    await interaction.editReply(message);
   },
 };

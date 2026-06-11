@@ -136,15 +136,19 @@ DEFAULT_VOLUME=0.5
 
 ## Agregar canciones
 
-Copiá archivos `.mp3` dentro de la carpeta `music/`:
+Copiá archivos `.mp3` dentro de la carpeta `music/`. También podés organizarlos en subcarpetas:
 
 ```txt
 music/
   mi-cancion.mp3
-  otra-cancion.mp3
+  Rock/
+    Queen/
+      bohemian-rhapsody.mp3
+  Cumbia/
+    tema.mp3
 ```
 
-El bot solo reproduce archivos `.mp3` que estén directamente dentro de esa carpeta.
+El bot busca `.mp3` dentro de `music/` y sus subcarpetas. En Discord los muestra con ruta relativa, por ejemplo `Rock/Queen/bohemian-rhapsody.mp3`.
 
 ## Instalar dependencias
 
@@ -203,8 +207,8 @@ pnpm run dev
 
 ## Comandos disponibles
 
-- `/list`: muestra las canciones `.mp3` disponibles.
-- `/play song:<archivo.mp3>`: reproduce una canción o la agrega a la cola.
+- `/list`: muestra las canciones `.mp3` disponibles, incluyendo subcarpetas.
+- `/play song:<archivo.mp3>`: reproduce una canción o la agrega a la cola. Si está en subcarpeta, usá la ruta relativa, por ejemplo `Rock/Queen/bohemian-rhapsody.mp3`.
 - `/pause`: pausa la canción actual.
 - `/resume`: reanuda la canción pausada.
 - `/skip`: salta a la siguiente canción.
@@ -225,6 +229,7 @@ En Discord:
 ```txt
 /list
 /play song:mi-cancion.mp3
+/play song:Rock/Queen/bohemian-rhapsody.mp3
 /pause
 /resume
 /skip
@@ -254,7 +259,7 @@ En Discord:
 
 ### No encuentra canciones
 
-- Poné los archivos dentro de `music/`.
+- Poné los archivos dentro de `music/` o alguna subcarpeta de `music/`.
 - Usá extensión `.mp3`.
 - Ejecutá `/list` para ver los nombres exactos.
 - Si cambiaste `MUSIC_DIR`, revisá que apunte a la carpeta correcta.
@@ -279,4 +284,4 @@ El bot necesita estos permisos en el canal de texto y voz:
 - No compartas el token.
 - No subas `.env` a GitHub.
 - Usá solo música que tengas permiso de reproducir.
-- El bot valida los nombres y solo reproduce `.mp3` encontrados dentro de `MUSIC_DIR`.
+- El bot valida las rutas y solo reproduce `.mp3` encontrados dentro de `MUSIC_DIR` o sus subcarpetas.
